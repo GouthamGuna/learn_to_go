@@ -2,30 +2,17 @@ package main
 
 import (
 	"fmt"
-	"regexp"
-	"strconv"
 	"task/basic"
+	"task/challenges"
 )
 
 func main() {
 
-	pro := []string{"get fee list of 456", "fee balance of 80", "pending fee of 74", "total fee of 70", "10"}
+	fmt.Println("------------ Exercise ------------")
 
-	var i []int
-	re := regexp.MustCompile(`\d+`)
+	basic.Basic_PKG_Runner()
 
-	for _, str := range pro {
-		match := re.FindString(str)
+	fmt.Println("------------ Challenges ------------")
 
-		if match != "" {
-			num, err := strconv.Atoi(match)
-
-			if err == nil {
-				i = append(i, num)
-			}
-		}
-	}
-
-	fmt.Printf("%d", i)
-	basic.QuotePrint()
+	challenges.Challengers_PKG_Runner()
 }

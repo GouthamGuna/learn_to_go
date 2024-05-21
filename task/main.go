@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
+	"task/basic"
 )
 
 func main() {
@@ -26,4 +27,5 @@ func main() {
 	}
 
 	fmt.Printf("%d", i)
+	basic.QuotePrint()
 }

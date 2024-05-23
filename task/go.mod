@@ -1,4 +1,4 @@
-module task
+module github.com/GouthamGuna/learn_to_go/task
 
 go 1.22.3
 

@@ -84,5 +84,75 @@ func ExerciseTen() {
 }
 
 // Switch
+
+func ExerciseEleven() {
+	var day = 2
+	switch day {
+	case (1):
+		fmt.Print("Saturday ::: from Switch case\n")
+	case (2):
+		fmt.Print("Sunday ::: from Switch case\n")
+	}
+}
+
+func ExerciseTwelve() {
+	var day = 4
+
+	switch day {
+
+	case (1):
+		fmt.Print("From Switch case ::: Saturday\n")
+
+	case (2):
+		fmt.Print("From Switch case ::: Sunday\n")
+	default:
+		fmt.Print("From Switch case ::: Weekday\n")
+	}
+}
+
 // Loops
+
+func ExerciseThirteen() {
+
+	for i := 0; i < 6; i++ {
+		fmt.Printf("From Thirteen for loop ::: %d\n", i)
+	}
+}
+
+func ExerciseFourteen() {
+
+	for i := 0; i < 5; i++ {
+		fmt.Println("---------------------------------")
+		fmt.Printf("Use a for loop to print Yes 5 times ::: %d\n", i)
+	}
+}
+
+func ExerciseFifteen() {
+
+	for i := 0; i < 10; i++ {
+		if i == 5 {
+			fmt.Printf("Stop the loop if for is 5 ::: %d\n", i)
+			break
+		}
+	}
+}
+
+func ExerciseSixteen() {
+
+	for i := 0; i < 10; i++ {
+		if i == 4 {
+			fmt.Println("In the following loop, when the value is 4, jump directly to the next value.")
+			continue
+		}
+	}
+}
+
 // Functions
+
+func myFunction(fname string) {
+	fmt.Printf("Author ::: %v Gunasekaran\n", fname)
+}
+
+func myFunctionReturnInt(x int) int {
+	return 6 + x
+}

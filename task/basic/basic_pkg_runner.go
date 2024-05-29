@@ -43,5 +43,10 @@ func Basic_PKG_Runner() {
 
 	// Variables
 	VariablesExample_1()
-
+	VariablesExample_2()
+	VariablesExample_3()
+	VariablesExample_4()
+	VariablesExample_5()
+	VariablesExample_6()
+	VariablesExample_7()
 }

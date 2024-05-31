@@ -49,4 +49,14 @@ func Basic_PKG_Runner() {
 	VariablesExample_5()
 	VariablesExample_6()
 	VariablesExample_7()
+
+	fmt.Println("-----------------------------------------------------")
+	fmt.Println(" Go - Constants Starting Here !")
+	fmt.Println("-----------------------------------------------------")
+
+	// Constants
+	ConstantsExample_1()
+	ConstantsExample_2()
+	ConstantsExample_3()
+	ConstantsExample_5()
 }

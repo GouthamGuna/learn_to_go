@@ -41,7 +41,7 @@ func VariablesExample_3() {
 	var b int
 	var c bool
 
-	fmt.Printf(a)
+	fmt.Println(a)
 	fmt.Println(b)
 	fmt.Println(c)
 }
@@ -95,7 +95,7 @@ func VariablesExample_6() {
 // Go Variable Declaration in a Block
 func VariablesExample_7() {
 
-	fmt.Println("\nGo Variable Declaration in a Block\n")
+	fmt.Println("\nGo Variable Declaration in a Block")
 
 	var (
 		a int

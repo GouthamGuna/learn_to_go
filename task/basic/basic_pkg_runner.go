@@ -59,4 +59,16 @@ func Basic_PKG_Runner() {
 	ConstantsExample_2()
 	ConstantsExample_3()
 	ConstantsExample_5()
+
+	fmt.Println("-----------------------------------------------------")
+	fmt.Println(" Go - Formatting Starting Here !")
+	fmt.Println("-----------------------------------------------------")
+
+
+	// Formatting
+	Formatting_Example_1()
+	Formatting_Example_2()
+	Formatting_Example_3()
+	Formatting_Example_4()
+	Formatting_Example_5()
 }

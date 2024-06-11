@@ -7,7 +7,7 @@ import (
 
 const RatioBy float64 = 100.0
 
-func DoCalculation() {
+func InvestmentCalculator() {
 
 	const inflationRate = 6.5
 
@@ -28,5 +28,8 @@ func DoCalculation() {
 	futureValue := investmentAmount * math.Pow(1+expectedReturnRate/RatioBy, years)
 	futureRealValue := futureValue / math.Pow(1+inflationRate/100, years)
 
-	fmt.Printf("futureValue : %.2f, futureRealValue : %.2f", futureValue, futureRealValue)
+	formattedFV := fmt.Sprintf("Future Value: %.2f", futureValue)
+	formattedRFV := fmt.Sprintf("\nFuture Value (adjusted for Inflation): %.2f\n", futureRealValue)
+
+	fmt.Println(formattedFV, formattedRFV)
 }

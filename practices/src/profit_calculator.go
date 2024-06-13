@@ -3,18 +3,9 @@ package src
 import "fmt"
 
 func ProfitCalculator() {
-	var revenue float64
-	var expenses float64
-	var taxRate float64
-
-	fmt.Print("Enter revenue :")
-	fmt.Scan(&revenue)
-
-	fmt.Print("Enter expenses :")
-	fmt.Scan(&expenses)
-
-	fmt.Print("Enter taxRate :")
-	fmt.Scan(&taxRate)
+	revenue := fetchResourceFromUser("Enter revenue : ")
+	expenses := fetchResourceFromUser("Enter expenses : ")
+	taxRate := fetchResourceFromUser("Enter taxRate : ")
 
 	// earnings before tax
 	ebt := revenue - expenses

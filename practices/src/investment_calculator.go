@@ -1,6 +1,7 @@
 package src
 
 import (
+	"errors"
 	"fmt"
 	"math"
 )
@@ -30,7 +31,24 @@ func doCalculate(investmentAmount, expectedReturnRate, years float64) (float64, 
 }
 
 func fetchResourceFromUser(infoText string) (responseValue float64) {
+
 	fmt.Print(infoText)
 	fmt.Scan(&responseValue)
+
+	responseValue, err := validateUserInput(responseValue)
+
+	if err != nil {
+		fmt.Println(err)
+		ApplicationRunner()
+	}
+
 	return responseValue
+}
+
+func validateUserInput(userInput float64) (float64, error) {
+	if userInput <= 0 {
+		return 0.00, errors.New("please enter a positive number")
+	}
+	LogWritter("Invoking the validateUserInput...")
+	return userInput, nil
 }

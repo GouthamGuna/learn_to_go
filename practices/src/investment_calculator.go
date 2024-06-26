@@ -38,8 +38,7 @@ func fetchResourceFromUser(infoText string) (responseValue float64) {
 	responseValue, err := validateUserInput(responseValue)
 
 	if err != nil {
-		fmt.Println(err)
-		ApplicationRunner()
+		panic(err)
 	}
 
 	return responseValue

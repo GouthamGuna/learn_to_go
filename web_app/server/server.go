@@ -12,6 +12,8 @@ func StartServer() {
 
 	fmt.Printf("Hello Lunar! \nServer Start and Running on ::: %s%s", IP_ADDRESS, SERVER_PORT)
 
+	const songsDir = "datasource/Chinna_Chinna_Kangal.mp3"
+
 	http.HandleFunc("/", func(response http.ResponseWriter, request *http.Request) {
 		fmt.Fprintf(response, "Hello Lunar From Golang Server...")
 	})
@@ -24,7 +26,18 @@ func StartServer() {
 		} else {
 			fmt.Fprintf(reponse, "Hello %s\n", userName)
 		}
+	})
 
+	http.HandleFunc("/music", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, songsDir)
+	})
+
+	http.HandleFunc("/video", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "datasource/Arupadai Muruga _ Murugan.mp4")
+	})
+
+	http.HandleFunc("/mix", func(w http.ResponseWriter, r *http.Request) {
+		http.ServeFile(w, r, "datasource/mix.json")
 	})
 
 	http.ListenAndServe(SERVER_PORT, nil)

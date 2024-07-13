@@ -14,7 +14,7 @@ func main() {
 	// agePointer = &age // should merge variable declaration with assignment
 
 	fmt.Printf("The age is: %d\n", *agePointer)
-	fmt.Println(validateAge(*agePointer))
+	fmt.Println(validateAge(age))
 }
 
 func validateAge(age int) string {

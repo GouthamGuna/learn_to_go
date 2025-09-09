@@ -1,0 +1,62 @@
+# Binaries for programs and plugins
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+/bin/
+/dist/
+
+# Go workspace file
+go.work
+
+# Dependency directories
+vendor/
+/vendor/
+
+# Go module files (if you don't want to commit them)
+# go.mod
+# go.sum
+
+# IDE and editor files
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# Logs
+*.log
+logs/
+
+# Coverage files
+*.coverprofile
+coverage.txt
+coverage.html
+coverage.out
+
+# Build artifacts
+/build/
+/artifacts/
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production
+
+# Temporary files
+/tmp/
+/temp/

@@ -6,7 +6,6 @@ const (
 	APIFilePreviewPath = "/api/v1/file_preview"
 	APIDeletePath      = "/api/v1/delete?file="
 	APIBasePath_V1     = "/api/v1"
-	APIBasePath_V2     = "/api/v2"
 
 	// Error messages
 	ErrInvalidRequest      = "Invalid request"

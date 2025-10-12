@@ -27,12 +27,20 @@ func FilePreviewHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// Link is valid; retrieve the file path from the URL.
-	fileName := r.URL.Query().Get("file")
+	encodedFileName := r.URL.Query().Get("file")
+
+	// Decode the Base64 encoded filename
+	fileName, err := decodeFileName(encodedFileName)
+	if err != nil {
+		logger.Infof("Error decoding filename: %v", err)
+		response.WriteError(w, http.StatusBadRequest, "Invalid file name encoding", "Bad Request")
+		return
+	}
 
 	// Get the user's home directory
-	var homeDir, err = common.GetBaseDirectory()
-	if err != nil {
-		response.WriteError(w, http.StatusInternalServerError, err.Error(), "Internal Server Error")
+	var homeDir, err2 = common.GetBaseDirectory()
+	if err2 != nil {
+		response.WriteError(w, http.StatusInternalServerError, err2.Error(), "Internal Server Error")
 		return
 	}
 
@@ -48,11 +56,11 @@ func FilePreviewHandler(w http.ResponseWriter, r *http.Request) {
 // isValidSignedURL validates the signature and expiration time of a signed URL.
 func isValidSignedURL(r *http.Request) bool {
 	// Extract query parameters.
-	filePath := r.URL.Query().Get("file")
+	encodedFilePath := r.URL.Query().Get("file")
 	expiresStr := r.URL.Query().Get("expires")
 	signature := r.URL.Query().Get("signature")
 
-	if filePath == "" || expiresStr == "" || signature == "" {
+	if encodedFilePath == "" || expiresStr == "" || signature == "" {
 		return false
 	}
 
@@ -63,7 +71,8 @@ func isValidSignedURL(r *http.Request) bool {
 	}
 
 	// Recreate the signature on the server side and compare.
-	dataToSign := fmt.Sprintf("%s:%d", filePath, expires)
+	// Note: We use the encoded filename in the signature verification since that's what was signed
+	dataToSign := fmt.Sprintf("%s:%d", encodedFilePath, expires)
 	h := hmac.New(sha256.New, []byte(os.Getenv("SIGNING_KEY")))
 	h.Write([]byte(dataToSign))
 	expectedSignature := base64.URLEncoding.EncodeToString(h.Sum(nil))
@@ -76,9 +85,18 @@ func serveFile(w http.ResponseWriter, r *http.Request, disposition string) {
 
 	common.GETRequestValidator(w, r)
 
-	fileName := r.URL.Query().Get("file")
-	if fileName == "" {
+	// Get the Base64 encoded filename
+	encodedFileName := r.URL.Query().Get("file")
+	if encodedFileName == "" {
 		response.WriteError(w, http.StatusBadRequest, "Please specify a file name", "File parameter is required")
+		return
+	}
+
+	// Decode the Base64 encoded filename
+	fileName, err := decodeFileName(encodedFileName)
+	if err != nil {
+		logger.Infof("Error decoding filename: %v", err)
+		response.WriteError(w, http.StatusBadRequest, "Invalid file name encoding", "Bad Request")
 		return
 	}
 
@@ -125,10 +143,10 @@ func serveFile(w http.ResponseWriter, r *http.Request, disposition string) {
 	}
 
 	// Check if it's an MP4 file that needs chunked streaming
-    if strings.ToLower(filepath.Ext(filePath)) == ".mp4" && disposition == "stream" {
-        serveMP4Chunked(w, r, filePath, fileInfo)
-        return
-    }
+	if strings.ToLower(filepath.Ext(filePath)) == ".mp4" && disposition == "stream" {
+		serveMP4Chunked(w, r, filePath, fileInfo)
+		return
+	}
 
 	// Set appropriate headers based on disposition type
 	if disposition == "download" {
@@ -201,6 +219,11 @@ func sanitizeFileName(fileName string) string {
 	return cleanName
 }
 
+// decodeFileName decodes a Base64 encoded filename back to its original form
+func decodeFileName(encodedName string) (string, error) {
+	return common.DecodeFileName(encodedName)
+}
+
 func DeleteFile(w http.ResponseWriter, r *http.Request) {
 	logger.Info("Handling file deletion request")
 	role, ok := middleware.GetUserRoleFromContext(r.Context())
@@ -224,9 +247,18 @@ func deleteRequestValidator(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	fileName := r.URL.Query().Get("file")
-	if fileName == "" {
+	// Get the Base64 encoded filename
+	encodedFileName := r.URL.Query().Get("file")
+	if encodedFileName == "" {
 		response.WriteError(w, http.StatusBadRequest, "File name is required", "Invalid file name")
+		return
+	}
+
+	// Decode the Base64 encoded filename
+	fileName, err := decodeFileName(encodedFileName)
+	if err != nil {
+		logger.Infof("Error decoding filename: %v", err)
+		response.WriteError(w, http.StatusBadRequest, "Invalid file name encoding", "Bad Request")
 		return
 	}
 
@@ -276,67 +308,67 @@ func deleteRequestValidator(w http.ResponseWriter, r *http.Request) {
 }
 
 func serveMP4Chunked(w http.ResponseWriter, r *http.Request, filePath string, fileInfo os.FileInfo) {
-    const chunkSize = 1024 * 1024 // 1MB chunks
+	const chunkSize = 1024 * 1024 // 1MB chunks
 
-    file, err := os.Open(filePath)
-    if err != nil {
-        logger.Infof("Error opening file: %v", err)
-        response.WriteError(w, http.StatusInternalServerError, "Could not open file", "Internal server error")
-        return
-    }
-    defer file.Close()
+	file, err := os.Open(filePath)
+	if err != nil {
+		logger.Infof("Error opening file: %v", err)
+		response.WriteError(w, http.StatusInternalServerError, "Could not open file", "Internal server error")
+		return
+	}
+	defer file.Close()
 
-    // Handle range requests for seeking
-    rangeHeader := r.Header.Get("Range")
-    var start, end int64
-    if rangeHeader != "" {
-        if strings.HasPrefix(rangeHeader, "bytes=") {
-            rangeHeader = strings.TrimPrefix(rangeHeader, "bytes=")
-            parts := strings.Split(rangeHeader, "-")
-            if len(parts) == 2 {
-                start, _ = strconv.ParseInt(parts[0], 10, 64)
-                if parts[1] != "" {
-                    end, _ = strconv.ParseInt(parts[1], 10, 64)
-                } else {
-                    end = fileInfo.Size() - 1
-                }
-            }
-        }
-        w.Header().Set("Content-Range", fmt.Sprintf("bytes %d-%d/%d", start, end, fileInfo.Size()))
-        w.WriteHeader(http.StatusPartialContent)
-    } else {
-        end = fileInfo.Size() - 1
-    }
+	// Handle range requests for seeking
+	rangeHeader := r.Header.Get("Range")
+	var start, end int64
+	if rangeHeader != "" {
+		if strings.HasPrefix(rangeHeader, "bytes=") {
+			rangeHeader = strings.TrimPrefix(rangeHeader, "bytes=")
+			parts := strings.Split(rangeHeader, "-")
+			if len(parts) == 2 {
+				start, _ = strconv.ParseInt(parts[0], 10, 64)
+				if parts[1] != "" {
+					end, _ = strconv.ParseInt(parts[1], 10, 64)
+				} else {
+					end = fileInfo.Size() - 1
+				}
+			}
+		}
+		w.Header().Set("Content-Range", fmt.Sprintf("bytes %d-%d/%d", start, end, fileInfo.Size()))
+		w.WriteHeader(http.StatusPartialContent)
+	} else {
+		end = fileInfo.Size() - 1
+	}
 
-    w.Header().Set("Content-Type", "video/mp4")
-    w.Header().Set("Accept-Ranges", "bytes")
-    w.Header().Set("Transfer-Encoding", "chunked")
+	w.Header().Set("Content-Type", "video/mp4")
+	w.Header().Set("Accept-Ranges", "bytes")
+	w.Header().Set("Transfer-Encoding", "chunked")
 
-    buffer := make([]byte, chunkSize)
-    file.Seek(start, 0)
-    bytesRemaining := end - start + 1
+	buffer := make([]byte, chunkSize)
+	file.Seek(start, 0)
+	bytesRemaining := end - start + 1
 
-    for bytesRemaining > 0 {
-        n := chunkSize
-        if bytesRemaining < int64(chunkSize) {
-            n = int(bytesRemaining)
-        }
+	for bytesRemaining > 0 {
+		n := chunkSize
+		if bytesRemaining < int64(chunkSize) {
+			n = int(bytesRemaining)
+		}
 
-        bytesRead, err := file.Read(buffer[:n])
-        if err != nil {
-            logger.Infof("Error reading file chunk: %v", err)
-            return
-        }
+		bytesRead, err := file.Read(buffer[:n])
+		if err != nil {
+			logger.Infof("Error reading file chunk: %v", err)
+			return
+		}
 
-        _, err = w.Write(buffer[:bytesRead])
-        if err != nil {
-            logger.Infof("Error writing chunk to response: %v", err)
-            return
-        }
+		_, err = w.Write(buffer[:bytesRead])
+		if err != nil {
+			logger.Infof("Error writing chunk to response: %v", err)
+			return
+		}
 
-        bytesRemaining -= int64(bytesRead)
-        if f, ok := w.(http.Flusher); ok {
-            f.Flush()
-        }
-    }
+		bytesRemaining -= int64(bytesRead)
+		if f, ok := w.(http.Flusher); ok {
+			f.Flush()
+		}
+	}
 }

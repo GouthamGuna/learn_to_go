@@ -1,6 +1,7 @@
 package pkg
 
 import (
+	"encoding/base64"
 	"net/http"
 	"os"
 
@@ -36,4 +37,18 @@ func GetBaseDirectory() (string, error) {
 func FaviconHandler(w http.ResponseWriter, r *http.Request) {
 	logger.Info("Serving favicon")
 	http.ServeFile(w, r, "web/static/favicon.ico")
+}
+
+// EncodeFileName encodes a filename to Base64 for use in URLs
+func EncodeFileName(fileName string) string {
+	return base64.URLEncoding.EncodeToString([]byte(fileName))
+}
+
+// DecodeFileName decodes a Base64-encoded filename back to its original form
+func DecodeFileName(encodedName string) (string, error) {
+	bytes, err := base64.URLEncoding.DecodeString(encodedName)
+	if err != nil {
+		return "", err
+	}
+	return string(bytes), nil
 }

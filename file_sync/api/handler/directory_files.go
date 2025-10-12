@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"io/fs"
 	"net/http"
-	"net/url"
 	"os"
 	"path/filepath"
 	"sort"
@@ -14,8 +13,8 @@ import (
 	middleware "github.com/GouthamGuna/file_sync/api/middleware"
 	common "github.com/GouthamGuna/file_sync/pkg/common"
 	dto "github.com/GouthamGuna/file_sync/pkg/dto"
-	response "github.com/GouthamGuna/file_sync/pkg/response"
 	logger "github.com/GouthamGuna/file_sync/pkg/logger"
+	response "github.com/GouthamGuna/file_sync/pkg/response"
 )
 
 // formatFileSize converts bytes to human readable format
@@ -134,7 +133,8 @@ func getFileMetadata(filePath, basePath, baseURL string, fileInfo fs.FileInfo) (
 		metadata.Size = formatFileSize(0)
 	} else {
 		// Only add links for files, not directories
-		encodedPath := url.QueryEscape(relPath)
+		// Use Base64 encoding for filenames in URLs for security
+		encodedPath := common.EncodeFileName(relPath)
 		metadata.Links = &dto.FileLinks{
 			URL:      fmt.Sprintf("%s"+common.APIDataPath+"%s", baseURL, encodedPath),
 			Download: fmt.Sprintf("%s"+common.APIDownloadPath+"%s", baseURL, encodedPath),
@@ -206,7 +206,7 @@ func sortFiles(files map[string]dto.FileMetadata) []dto.FileMetadata {
 
 // GetFilesMetadataHandler is the main function that returns the JSON response
 func getFilesMetadataHandler() ([]byte, error) {
-	var userHome, err = common.GetBaseDirectory();
+	var userHome, err = common.GetBaseDirectory()
 	if err != nil {
 		return nil, fmt.Errorf("error getting user home directory: %v", err)
 	}

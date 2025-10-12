@@ -164,3 +164,13 @@ Building Windows executable...
 Build successful! Created file-sync.exe
 Press Enter to continue: 
 ```
+
+## Update GOTOOLCHAIN environment variable
+```bash
+$env:GOTOOLCHAIN="go1.23.4"; go build
+```
+
+## Let's try cleaning the Go module cache and rebuilding your project
+```bash
+go clean -cache -modcache && go mod tidy
+```
